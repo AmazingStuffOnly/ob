@@ -1,0 +1,9 @@
+{
+    "require": {
+        "slim/slim": "^3.0",
+        "illuminate/support": "^5.7"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^4.1"
+    }
+}
