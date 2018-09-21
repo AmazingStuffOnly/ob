@@ -1,6 +1,7 @@
 <?php
 
 error_reporting(null);
+session_start();
 
 use \Slim\Http\Request as Request;
 use \Slim\Http\Response as Response;
@@ -325,6 +326,8 @@ $app->any(
         sleep(
             rand(1, 30)
         );
+
+        session_write_close();
 
         return $response
             ->withStatus(201)
