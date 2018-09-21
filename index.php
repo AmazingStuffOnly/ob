@@ -308,6 +308,8 @@ $app->post(
             rand(1, 30)
         );
 
+        # DB locking ?
+
         return $response
             ->withStatus(201)
             ->withJson($input);
