@@ -1,7 +1,6 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+error_reporting(null);
 
 use \Slim\Http\Request as Request;
 use \Slim\Http\Response as Response;
@@ -11,7 +10,7 @@ require_once 'vendor/autoload.php';
 $app = new \Slim\App(
     [
         'settings' => [
-            'displayErrorDetails' => true,
+            'displayErrorDetails' => false,
             'determineRouteBeforeAppMiddleware' => true,
             'db' => [
                 'driver' => 'mysql',
@@ -97,7 +96,7 @@ $app->any(
 
         $input = [
             'player_id' => 1,
-            'stake_amount' => '1000.99',
+            'stake_amount' => '123.99',
             'errors' => [],
             'selections' => [
                 [
@@ -119,7 +118,7 @@ $app->any(
         switch (true) {
             case empty($input['player_id']):
             case empty($input['stake_amount']):
-                $input['errors'][] = $settings['errors'][1];
+                $input['errors'][] = $settings['errors'][1]; # Error key can be constants
 
                 # No need to use API resources if we already know that request is bad
                 return $response->withJson($input, 400);
@@ -264,11 +263,64 @@ $app->any(
             return $response->withJson($input, 400);
         }
 
-//        var_dump($oddsMultiplier);
+        $player = $database::table('player')
+            ->where('id', $input['player_id'])
+            ->get();
 
-//        $users = $database::table('test')
-//            ->select('name')
-//            ->where('id', 1);
+        $balance = 1000;
+        if ($player->isEmpty()) {
+            $database::table('player')->insert(
+                [
+                    'id' => $input['player_id'],
+                    'balance' => $balance
+                ]
+            );
+        } else {
+            $balance = $player->first()->balance;
+        }
+
+        if ($balance < $input['stake_amount']) {
+            $input['errors'][] = $settings['errors'][11];
+            return $response->withJson($input, 400);
+        }
+
+        $database::table('player')
+            ->where('id', $input['player_id'])
+            ->update(
+                [
+                    'balance' => $balance - $input['stake_amount']
+                ]
+            );
+
+        $database::table('balance_transaction')
+            ->insert(
+                [
+                    'player_id' => $input['player_id'],
+                    'amount' => $balance - $input['stake_amount'],
+                    'amount_before' => $balance,
+                ]
+            );
+
+        $betUid = $database::table('bet')
+            ->insertGetId(
+                [
+                    'stake_amount' => $input['stake_amount']
+                ]
+            );
+
+        $database::table('bet_selections')
+            ->insert(
+                array_map(
+                    function ($selection) use ($betUid) {
+                        return [
+                            'bet_id' => $betUid,
+                            'selection_id' => $selection['id'],
+                            'odds' => $selection['odds'],
+                        ];
+                    },
+                    $input['selections']
+                )
+            );
 
         return $response
             ->withStatus(201)
