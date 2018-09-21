@@ -1,7 +1,6 @@
 <?php
 
 error_reporting(null);
-session_start();
 
 use \Slim\Http\Request as Request;
 use \Slim\Http\Response as Response;
@@ -86,8 +85,8 @@ $container['phpErrorHandler'] = function ($container) {
     };
 };
 
-$app->any(
-    '/',
+$app->post(
+    '/bet/api',
     function (Request $request, Response $response) {
         /**
          * @var $database \Illuminate\Database\Capsule\Manager
@@ -95,25 +94,7 @@ $app->any(
         $database = $this->get('database');
         $settings = $this->get('settings');
 
-        $input = [
-            'player_id' => 1,
-            'stake_amount' => '123.99',
-            'errors' => [],
-            'selections' => [
-                [
-                    'id' => 1,
-                    'odds' => '1.601',
-                    'errors' => [],
-                ],
-                [
-                    'id' => 2,
-                    'odds' => '1.601',
-                    'errors' => [],
-                ]
-            ]
-        ];
-
-//        $input = $request->getParams();
+        $input = $request->getParams();
 
         # Checking bet mandatory fields
         switch (true) {
@@ -326,8 +307,6 @@ $app->any(
         sleep(
             rand(1, 30)
         );
-
-        session_write_close();
 
         return $response
             ->withStatus(201)
