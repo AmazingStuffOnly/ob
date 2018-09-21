@@ -308,7 +308,9 @@ $app->post(
             rand(1, 30)
         );
 
-        # DB locking ?
+        # Flock ?
+        # Semaphore ?
+        # SQL/Redis/Whatever locking ?
 
         return $response
             ->withStatus(201)
