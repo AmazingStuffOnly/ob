@@ -23,6 +23,11 @@ $app = new \Slim\App(
                 'collation' => 'utf8_unicode_ci',
                 'prefix' => '',
             ],
+            'win' => [
+                'amount' => [
+                    'max' => 20000
+                ]
+            ],
             'stakes' => [
                 'amount' => [
                     'min' => 0.3,
@@ -242,6 +247,24 @@ $app->any(
         if ($selectionsHadError) {
             return $response->withJson($input, 400);
         }
+
+        $winAmount = array_reduce(
+            $selectionOdds,
+            function ($carry, $odd) {
+                return $carry * $odd;
+            },
+            $input['stake_amount']
+        );
+
+        if ($winAmount > 20000) {
+            $input['errors'][] = sprintf(
+                $settings['errors'][9],
+                $settings['win']['amount']['max']
+            );
+            return $response->withJson($input, 400);
+        }
+
+//        var_dump($oddsMultiplier);
 
 //        $users = $database::table('test')
 //            ->select('name')
