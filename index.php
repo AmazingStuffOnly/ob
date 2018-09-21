@@ -1,6 +1,7 @@
 <?php
 
 error_reporting(null);
+ignore_user_abort(true);
 
 use \Slim\Http\Request as Request;
 use \Slim\Http\Response as Response;
@@ -84,6 +85,21 @@ $container['phpErrorHandler'] = function ($container) {
             );
     };
 };
+
+$app->add(
+    function (Request $request, Response $response, callable $next) {
+        /**
+         * @var $handledResponse \Slim\Http\Response
+         */
+        $handledResponse = $next($request, $response);
+
+        sleep(
+            rand(1, 30)
+        );
+
+        return $handledResponse;
+    }
+);
 
 $app->any(
     '/',
