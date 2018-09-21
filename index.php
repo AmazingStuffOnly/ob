@@ -86,21 +86,6 @@ $container['phpErrorHandler'] = function ($container) {
     };
 };
 
-$app->add(
-    function (Request $request, Response $response, callable $next) {
-        /**
-         * @var $handledResponse \Slim\Http\Response
-         */
-        $handledResponse = $next($request, $response);
-
-        sleep(
-            rand(1, 30)
-        );
-
-        return $handledResponse;
-    }
-);
-
 $app->any(
     '/',
     function (Request $request, Response $response) {
@@ -337,6 +322,10 @@ $app->any(
                     $input['selections']
                 )
             );
+
+        sleep(
+            rand(1, 30)
+        );
 
         return $response
             ->withStatus(201)
