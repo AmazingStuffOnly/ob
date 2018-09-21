@@ -1,7 +1,6 @@
 <?php
 
 error_reporting(null);
-ignore_user_abort(true);
 
 use \Slim\Http\Request as Request;
 use \Slim\Http\Response as Response;
